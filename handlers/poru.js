@@ -4,10 +4,10 @@ const { formatDuration } = require('../functions/functions');
 
 const Nodes = [
     {
-        name: "USA Lavalink Server",
-        host: "154.12.250.82",
-        port: 2333,
-        password: "redbot"
+        name: process.env.LavalinkName,
+        host: process.env.LavalinkHost,
+        port: process.env.LavalinkPort,
+        password: process.env.LavalinkPassword
     }
 ];
 
