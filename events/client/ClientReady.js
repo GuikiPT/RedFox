@@ -5,7 +5,7 @@ module.exports = {
   name: Discord.Events.ClientReady,
   once: true,
   async execute(client) {
-    console.log(colors.green(`Logged in as ${client.user.tag}`));
+    console.log(colors.green(`Logged in as ${colors.red(client.user.tag)}`));
 
     const activity = process.env.DiscordBotActivity;
     const status = process.env.DiscordBotStatus;
@@ -21,7 +21,7 @@ module.exports = {
           ],
           status: status,
         });
-        console.log(colors.blue('Presence set successfully.'));
+        console.info(colors.blue('Presence set successfully.'));
       } catch (err) {
         console.error(colors.red('Error setting presence:'));
         console.error(colors.red(err.stack || err));
