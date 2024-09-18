@@ -63,7 +63,7 @@ module.exports = async function (client) {
             .setTitle(track.info.title)
             .setURL(track.info.uri)
             .setAuthor({
-                iconURL: 'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTd1MXd2YW41NDE0c2Q1aTRqbjFxcTlvZ2MxM3ZlOXVqYXlvYnBhdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/rlm6KFwsVT1YavLDUD/giphy.webp',
+                iconURL: 'https://i.gifer.com/5RT9.gif',
                 name: `Now Playing . . .`,
             })
             .addFields(
