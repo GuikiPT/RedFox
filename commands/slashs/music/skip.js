@@ -31,7 +31,11 @@ module.exports = {
                         ? `The current track has been skipped. Now playing: **${nextTrack.info.title}**.`
                         : 'The current track has been skipped, but there are no more tracks in the queue.'
                 )
-                .setTimestamp();
+                .setTimestamp()
+                .setFooter({
+                    text: `Requested by ${interaction.member.displayName}`,
+                    iconURL: interaction.member.displayAvatarURL()
+                });
 
             await interaction.reply({ embeds: [skipEmbed] });
 

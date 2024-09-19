@@ -25,7 +25,11 @@ module.exports = {
                 .setColor('Red')
                 .setTitle('🔌 | Player Disconnected')
                 .setDescription('The player has been disconnected and the bot has left the voice channel.')
-                .setTimestamp();
+                .setTimestamp()
+                .setFooter({
+                    text: `Requested by ${interaction.member.displayName}`,
+                    iconURL: interaction.member.displayAvatarURL()
+                });
 
             await interaction.reply({ embeds: [disconnectEmbed] });
 

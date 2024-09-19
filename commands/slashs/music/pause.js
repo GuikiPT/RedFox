@@ -35,7 +35,11 @@ module.exports = {
                 .setColor('Blue')
                 .setTitle('⏸ | Player Paused')
                 .setDescription(`The player has been paused successfully. Paused track: **${player.currentTrack.info.title}**`)
-                .setTimestamp();
+                .setTimestamp()
+                .setFooter({
+                    text: `Requested by ${interaction.member.displayName}`,
+                    iconURL: interaction.member.displayAvatarURL()
+                });
 
             await interaction.reply({ embeds: [pausedEmbed] });
 

@@ -66,18 +66,31 @@ module.exports = {
 
         const trackEmbed = new EmbedBuilder()
           .setColor('Green')
-          .setTitle('🎶 Added to Queue')
+          .setAuthor({
+            name: '📜 Music added to queue',
+          })
+          .setTitle(track.info.title)
+          .setURL(track.info.uri)
           .setThumbnail(thumbnail)
           .addFields(
             { name: '**Author**', value: `\`\`\`${track.info.author}\`\`\``, inline: false },
             { name: '**Music Name**', value: `\`\`\`${track.info.title}\`\`\``, inline: false },
             { name: '**Duration**', value: `\`\`\`${formatDuration(track.info.length)}\`\`\``, inline: false }
           )
-          .setDescription(`[${track.info.title}](${track.info.uri})`);
+          .setFooter({
+              text: `Requested by ${interaction.member.displayName}`,
+              iconURL: interaction.member.displayAvatarURL()
+          });
 
         await interaction.editReply({ embeds: [trackEmbed] });
 
         if (!player.isPlaying && !player.isPaused) {
+          const playerGuildVolume = interaction.client.poru.playerVolumes.get(player.guildId);
+          if (!playerGuildVolume) {
+              await player.setVolume(35);
+          } else {
+              await player.setVolume(playerGuildVolume);
+          }
           player.play();
         }
 
@@ -86,7 +99,7 @@ module.exports = {
       }
 
     } catch (error) {
-      console.error('Error while executing play command:', error);
+      console.error('Error while executing play command:', error.stack);
 
       await interaction.editReply({ content: '❌ | An error occurred while executing this command.' });
     }

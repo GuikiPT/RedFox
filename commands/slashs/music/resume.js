@@ -35,7 +35,11 @@ module.exports = {
                 .setColor('Green')
                 .setTitle('▶️ | Player Resumed')
                 .setDescription(`The player has been resumed successfully. Now playing: **${player.currentTrack.info.title}**`)
-                .setTimestamp();
+                .setTimestamp()
+                .setFooter({
+                    text: `Requested by ${interaction.member.displayName}`,
+                    iconURL: interaction.member.displayAvatarURL()
+                });
 
             await interaction.reply({ embeds: [resumedEmbed] });
 

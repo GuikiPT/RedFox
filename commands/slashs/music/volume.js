@@ -37,7 +37,11 @@ module.exports = {
                 .setColor('Yellow')
                 .setTitle('🔊 | Volume Changed')
                 .setDescription(`Volume has been set to **${volume}%**.`)
-                .setTimestamp();
+                .setTimestamp()
+                .setFooter({
+                    text: `Requested by ${interaction.member.displayName}`,
+                    iconURL: interaction.member.displayAvatarURL()
+                });
 
             await interaction.reply({ embeds: [volumeEmbed] });
 
