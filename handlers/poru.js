@@ -37,7 +37,6 @@ module.exports = async function (client) {
     client.poru = new Poru(client, Nodes, PoruOptions);
 
     client.on("ready", () => {
-        console.log(`${client.user.tag} is ready!`);
         client.poru.init(client.user.id);
     });
 
