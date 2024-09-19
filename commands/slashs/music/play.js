@@ -16,16 +16,18 @@ module.exports = {
     const query = interaction.options.getString('query');
     const { member, guild, channel } = interaction;
 
-    // Make sure the user is in a voice channel
     if (!member.voice.channel) {
-      return interaction.reply({ content: 'You need to be in a voice channel to use this command!', ephemeral: true });
+      return interaction.reply({ content: '❌ | You need to be in a voice channel to use this command!', ephemeral: true });
     }
 
-    // Defer the reply to give more time for processing
+    const botVoiceChannel = guild.members.me.voice.channel;
+    if (botVoiceChannel && botVoiceChannel.id !== member.voice.channel.id) {
+      return interaction.reply({ content: '❌ | You need to be in the same voice channel as the bot to use this command!', ephemeral: true });
+    }
+
     await interaction.deferReply();
 
     try {
-      // Create or get the player
       const player = interaction.client.poru.createConnection({
         guildId: guild.id,
         voiceChannel: member.voice.channel.id,
@@ -33,10 +35,7 @@ module.exports = {
         deaf: true,
       });
 
-      // Resolve the query (search or load)
-      const resolve = await interaction.client.poru.resolve({
-        query: query,
-      });
+      const resolve = await interaction.client.poru.resolve({ query });
 
       const { loadType, tracks, playlistInfo } = resolve;
 
@@ -46,7 +45,6 @@ module.exports = {
           player.queue.add(track);
         }
 
-        // Playlist Embed
         const playlistEmbed = new EmbedBuilder()
           .setColor('Blue')
           .setTitle(`🎶 Playlist Loaded: ${playlistInfo.name}`)
@@ -54,9 +52,8 @@ module.exports = {
 
         await interaction.editReply({ embeds: [playlistEmbed] });
 
-        // Start playing if not already playing
         if (!player.isPlaying && !player.isPaused) {
-          return player.play();
+          player.play();
         }
 
       } else if (loadType === 'search' || loadType === 'track') {
@@ -65,26 +62,23 @@ module.exports = {
 
         const thumbnail = track.info.artworkUrl || `https://img.youtube.com/vi/${track.info.identifier}/mqdefault.jpg`;
 
-        // Add the track to the queue
         player.queue.add(track);
 
-        // Track Embed
         const trackEmbed = new EmbedBuilder()
           .setColor('Green')
-          .setTitle(`🎶 Added to Queue`)
+          .setTitle('🎶 Added to Queue')
           .setThumbnail(thumbnail)
           .addFields(
             { name: '**Author**', value: `\`\`\`${track.info.author}\`\`\``, inline: false },
             { name: '**Music Name**', value: `\`\`\`${track.info.title}\`\`\``, inline: false },
-            { name: '**Duration**', value: `\`\`\`${formatDuration(track.info.length)}\`\`\``, inline: false },
+            { name: '**Duration**', value: `\`\`\`${formatDuration(track.info.length)}\`\`\``, inline: false }
           )
           .setDescription(`[${track.info.title}](${track.info.uri})`);
 
         await interaction.editReply({ embeds: [trackEmbed] });
 
-        // Start playing if not already playing
         if (!player.isPlaying && !player.isPaused) {
-          return player.play();
+          player.play();
         }
 
       } else {
@@ -92,7 +86,8 @@ module.exports = {
       }
 
     } catch (error) {
-      console.error(error);
+      console.error('Error while executing play command:', error);
+
       await interaction.editReply({ content: '❌ | An error occurred while executing this command.' });
     }
   },

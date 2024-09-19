@@ -8,14 +8,17 @@ module.exports = {
     
     async execute(interaction) {
         try {
-            const player = interaction.client.poru.players.get(interaction.guild.id);
+            const { guild, client } = interaction;
+            const player = client.poru.players.get(guild.id);
 
-            // Check if the player exists
             if (!player) {
                 return interaction.reply({ content: '❌ | No player found in this server.', ephemeral: true });
             }
 
-            // Check if the player is already paused
+            if (!player.currentTrack) {
+                return interaction.reply({ content: '❌ | No track is currently playing to pause.', ephemeral: true });
+            }
+
             if (player.isPaused) {
                 const alreadyPausedEmbed = new EmbedBuilder()
                     .setColor('Red')
@@ -26,26 +29,25 @@ module.exports = {
                 return interaction.reply({ embeds: [alreadyPausedEmbed], ephemeral: true });
             }
 
-            // Pause the player
             player.pause(true);
 
-            // Create an embed to confirm the pause
             const pausedEmbed = new EmbedBuilder()
                 .setColor('Blue')
                 .setTitle('⏸ | Player Paused')
-                .setDescription('The player has been paused successfully.')
+                .setDescription(`The player has been paused successfully. Paused track: **${player.currentTrack.info.title}**`)
                 .setTimestamp();
 
             await interaction.reply({ embeds: [pausedEmbed] });
 
         } catch (err) {
-            console.error(colors.red(err));
+            console.error(colors.red('Error executing the pause command:', err));
 
-            // Error handling
+            const errorMessage = '❌ | An error occurred while executing this command.';
+
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: '❌ | An error occurred while executing this command.', ephemeral: true });
+                await interaction.followUp({ content: errorMessage, ephemeral: true });
             } else {
-                await interaction.reply({ content: '❌ | An error occurred while executing this command.', ephemeral: true });
+                await interaction.reply({ content: errorMessage, ephemeral: true });
             }
         }
     },

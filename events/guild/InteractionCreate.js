@@ -23,7 +23,6 @@ module.exports = {
     },
 };
 
-// Centralized error handling
 async function handleCommandError(interaction, errorMessage) {
     if (interaction.replied || interaction.deferred) {
         await interaction.followUp({ content: errorMessage, ephemeral: true });

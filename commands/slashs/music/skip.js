@@ -8,33 +8,42 @@ module.exports = {
 
     async execute(interaction) {
         try {
-            const player = interaction.client.poru.players.get(interaction.guild.id);
+            const { guild, client } = interaction;
+            const player = client.poru.players.get(guild.id);
 
-            // Check if the player exists
             if (!player) {
                 return interaction.reply({ content: '❌ | No player found in this server.', ephemeral: true });
             }
 
-            // Stop the current track, which effectively skips it
+            if (!player.currentTrack) {
+                return interaction.reply({ content: '❌ | No track is currently playing to skip.', ephemeral: true });
+            }
+
             player.skip();
 
-            // Create an embed to confirm the skip
+            const nextTrack = player.queue[0];
+
             const skipEmbed = new EmbedBuilder()
                 .setColor('Orange')
                 .setTitle('⏭️ | Track Skipped')
-                .setDescription('The current track has been skipped successfully.')
+                .setDescription(
+                    nextTrack
+                        ? `The current track has been skipped. Now playing: **${nextTrack.info.title}**.`
+                        : 'The current track has been skipped, but there are no more tracks in the queue.'
+                )
                 .setTimestamp();
 
             await interaction.reply({ embeds: [skipEmbed] });
 
         } catch (err) {
-            console.error(colors.red(err));
+            console.error(colors.red('Error executing the skip command:', err));
 
-            // Error handling
+            const errorMessage = '❌ | An error occurred while executing this command.';
+
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: '❌ | An error occurred while executing this command.', ephemeral: true });
+                await interaction.followUp({ content: errorMessage, ephemeral: true });
             } else {
-                await interaction.reply({ content: '❌ | An error occurred while executing this command.', ephemeral: true });
+                await interaction.reply({ content: errorMessage, ephemeral: true });
             }
         }
     },

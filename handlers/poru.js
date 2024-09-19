@@ -27,9 +27,11 @@ const equalizer = [
 const PoruOptions = {
     library: "discord.js",
     defaultPlatform: "youtube",
-    reconnectTries: 10,  // Increase the number of reconnect attempts
-    reconnectInterval: 5000, // Wait 5 seconds between retries
+    reconnectTries: 10,
+    reconnectInterval: 5000,
 };
+
+const playerVolumes = new Map();
 
 module.exports = async function (client) {
     client.poru = new Poru(client, Nodes, PoruOptions);
@@ -45,19 +47,26 @@ module.exports = async function (client) {
 
     client.poru.on("nodeError", (node, error) => {
         console.error(`Node ${node.name} encountered an error: ${error.message}`);
-        
-        // Notify an admin or specific channel that the node is down
-        const errorChannel = client.channels.cache.get('YOUR_CHANNEL_ID'); // Replace with your channel ID
-        if (errorChannel) {
-            errorChannel.send(`❌ Node ${node.name} encountered an error: \`${error.message}\``);
-        }
     });
 
-    client.poru.on("trackStart", (player, track) => {
+    const setPlayerVolume = async (client, player) => {
+        const playerGuildVolume = client.poru.playerVolumes.get(player.guildId);
+
+        if (!playerGuildVolume) {
+            await player.setVolume(35);
+        } else {
+            await player.setVolume(playerGuildVolume);
+        }
+    };
+
+    client.poru.on("trackStart", async (player, track) => {
         const channel = client.channels.cache.get(player.textChannel);
 
+        await setPlayerVolume(client, player);
+        player.filters.setEqualizer(equalizer);
+
         const thumbnail = track.info.artworkUrl || `https://img.youtube.com/vi/${track.info.identifier}/mqdefault.jpg`;
-    
+
         const trackEmbed = new Discord.EmbedBuilder()
             .setColor('Blue')
             .setTitle(track.info.title)
@@ -70,6 +79,7 @@ module.exports = async function (client) {
                 { name: '**Author**', value: `\`\`\`${track.info.author}\`\`\``, inline: false },
                 { name: '**Music Name**', value: `\`\`\`${track.info.title}\`\`\``, inline: false },
                 { name: '**Duration**', value: `\`\`\`${formatDuration(track.info.length)}\`\`\``, inline: false },
+                { name: '**Volume**', value: `\`\`\`${player.volume}%\`\`\``, inline: false },
             )
             .setThumbnail(thumbnail)
             .setFooter({
@@ -81,17 +91,14 @@ module.exports = async function (client) {
         if (channel) {
             channel.send({ embeds: [trackEmbed] });
         }
-
-        player.filters.setEqualizer(equalizer);
-        player.setVolume(35);
     });
 
-    client.poru.on("trackEnd", (player) => {
-        const channel = client.channels.cache.get(player.textChannel);
-        if (channel) {
-            channel.send("⏹ Track has ended.");
-        }
-    });
+    // client.poru.on("trackEnd", (player) => {
+    //     const channel = client.channels.cache.get(player.textChannel);
+    //     if (channel) {
+    //         channel.send("⏹ Track has ended.");
+    //     }
+    // });
 
     client.poru.on("queueEnd", (player) => {
         const channel = client.channels.cache.get(player.textChannel);
@@ -101,8 +108,9 @@ module.exports = async function (client) {
         player.destroy();
     });
 
-    // Gracefully handle when the Lavalink node is disconnected
     client.poru.on("nodeDisconnect", (node, reason) => {
         console.warn(`Node ${node.name} disconnected: ${reason}`);
     });
+
+    client.poru.playerVolumes = playerVolumes;
 };

@@ -15,22 +15,24 @@ module.exports = {
     async execute(interaction) {
         try {
             const volume = interaction.options.getInteger('amount');
-            const player = interaction.client.poru.players.get(interaction.guild.id);
+            const { guild, client } = interaction;
+            const player = client.poru.players.get(guild.id);
 
-            // Check if the player exists
             if (!player) {
                 return interaction.reply({ content: '❌ | No player found in this server.', ephemeral: true });
             }
 
-            // Check if the volume input is a valid number between 0 and 100
             if (volume < 0 || volume > 100) {
-                return interaction.reply({ content: '❌ | Volume must be a number between 0 and 100.', ephemeral: true });
+                return interaction.reply({
+                    content: `❌ | Volume must be a number between 0 and 100. Current volume is **${player.volume}%**.`,
+                    ephemeral: true
+                });
             }
 
-            // Set the player volume
             player.setVolume(volume);
 
-            // Create an embed to confirm the volume change
+            client.poru.playerVolumes.set(guild.id, volume);
+
             const volumeEmbed = new EmbedBuilder()
                 .setColor('Yellow')
                 .setTitle('🔊 | Volume Changed')
@@ -40,13 +42,14 @@ module.exports = {
             await interaction.reply({ embeds: [volumeEmbed] });
 
         } catch (err) {
-            console.error(colors.red(err));
+            console.error(colors.red('Error executing the volume command:', err));
 
-            // Error handling
+            const errorMessage = '❌ | An error occurred while executing this command.';
+
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: '❌ | An error occurred while executing this command.', ephemeral: true });
+                await interaction.followUp({ content: errorMessage, ephemeral: true });
             } else {
-                await interaction.reply({ content: '❌ | An error occurred while executing this command.', ephemeral: true });
+                await interaction.reply({ content: errorMessage, ephemeral: true });
             }
         }
     },

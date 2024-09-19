@@ -127,5 +127,5 @@ process.on('SIGTERM', async () => {
 
 setInterval(() => {
     const memoryUsage = process.memoryUsage();
-    console.log(colors.blue(`Memory Usage: RSS: ${(memoryUsage.rss / 1024 / 1024).toFixed(2)} MB`));
+    console.debug(colors.blue(`Memory Usage: RSS: ${(memoryUsage.rss / 1024 / 1024).toFixed(2)} MB`));
 }, 60000);
