@@ -67,6 +67,25 @@ module.exports = async function (client) {
 
         const thumbnail = track.info.artworkUrl || `https://img.youtube.com/vi/${track.info.identifier}/mqdefault.jpg`;
 
+        let resolvedYoutubeLink = '';
+        const sourceName = track.info.sourceName;
+
+        if (sourceName === 'spotify') {
+            const query = `${track.info.author} ${track.info.title}`;
+            try {
+                const resolve = await client.poru.resolve({ query });
+                const { tracks } = resolve;
+
+                if (tracks.length > 0) {
+                    resolvedYoutubeLink = tracks[0].info.uri;
+                }
+            } catch (error) {
+                console.error('Error resolving Spotify to YouTube:', error);
+            }
+        } else if (sourceName === 'youtube') {
+            resolvedYoutubeLink = track.info.uri;
+        }
+
         const trackEmbed = new Discord.EmbedBuilder()
             .setColor('Blue')
             .setTitle(track.info.title)
@@ -87,18 +106,35 @@ module.exports = async function (client) {
                 iconURL: track.info.requester.displayAvatarURL()
             })
             .setTimestamp();
-        
+
+        const actionRow = new Discord.ActionRowBuilder();
+
+        if (resolvedYoutubeLink) {
+            actionRow.addComponents(
+                new Discord.ButtonBuilder()
+                    .setLabel('Open on YouTube')
+                    .setStyle(Discord.ButtonStyle.Link)
+                    .setURL(resolvedYoutubeLink)
+            );
+        }
+
+        if (sourceName === 'spotify') {
+            actionRow.addComponents(
+                new Discord.ButtonBuilder()
+                    .setLabel('Open on Spotify')
+                    .setStyle(Discord.ButtonStyle.Link)
+                    .setURL(track.info.uri)
+            );
+        }
+
         if (channel) {
-            channel.send({ embeds: [trackEmbed] });
+            if (actionRow.components.length > 0) {
+                channel.send({ embeds: [trackEmbed], components: [actionRow] });
+            } else {
+                channel.send({ embeds: [trackEmbed] });
+            }
         }
     });
-
-    // client.poru.on("trackEnd", (player) => {
-    //     const channel = client.channels.cache.get(player.textChannel);
-    //     if (channel) {
-    //         channel.send("⏹ Track has ended.");
-    //     }
-    // });
 
     client.poru.on("queueEnd", (player) => {
         const channel = client.channels.cache.get(player.textChannel);
