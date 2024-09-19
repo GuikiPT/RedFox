@@ -1,5 +1,7 @@
+const axios = require('axios');
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { formatDuration } = require('../../../functions/functions.js');
+require('dotenv').config();
 
 module.exports = {
   data: new SlashCommandBuilder()

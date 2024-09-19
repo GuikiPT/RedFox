@@ -2,6 +2,27 @@ const Discord = require('discord.js');
 const { Poru } = require('poru');
 const { formatDuration } = require('../functions/functions');
 const colors = require('colors/safe');
+const axios = require('axios');
+
+async function updateVoiceStatus(channelId, botToken, status) {
+    try {
+        const url = `https://discord.com/api/v10/channels/${channelId}/voice-status`;
+        
+        const response = await axios({
+            method: 'put',
+            url: url,
+            headers: {
+                'Authorization': `Bot ${botToken}`,
+                'Content-Type': 'application/json'
+            },
+            data: {
+                status: status
+            }
+        });
+    } catch (error) {
+        console.error(`Error updating voice status: ${error.response ? error.response.status : error.message}`);
+    }
+}
 
 const Nodes = [
     {
@@ -62,6 +83,9 @@ module.exports = async function (client) {
 
     client.poru.on("trackStart", async (player, track) => {
         const channel = client.channels.cache.get(player.textChannel);
+
+        await updateVoiceStatus(player.voiceChannel, process.env.DiscordToken, `Playing: ${track.info.title}`);
+
 
         await setPlayerVolume(client, player);
         player.filters.setEqualizer(equalizer);
