@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const { Poru } = require('poru');
 const { formatDuration } = require('../functions/functions');
+const colors = require('colors/safe');
 
 const Nodes = [
     {
@@ -41,7 +42,8 @@ module.exports = async function (client) {
     });
 
     client.poru.on("nodeConnect", (node) => {
-        console.log(`Node ${node.name} is now connected.`);
+        const consoleTextNodeConnect = colors.blue('Node ') + colors.red(`"${node.name}" `) + colors.blue('is now connected.')
+        console.log(consoleTextNodeConnect);
     });
 
     client.poru.on("nodeError", (node, error) => {
