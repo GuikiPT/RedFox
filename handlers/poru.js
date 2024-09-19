@@ -67,25 +67,6 @@ module.exports = async function (client) {
 
         const thumbnail = track.info.artworkUrl || `https://img.youtube.com/vi/${track.info.identifier}/mqdefault.jpg`;
 
-        let resolvedYoutubeLink = '';
-        const sourceName = track.info.sourceName;
-
-        if (sourceName === 'spotify') {
-            const query = `${track.info.author} ${track.info.title}`;
-            try {
-                const resolve = await client.poru.resolve({ query });
-                const { tracks } = resolve;
-
-                if (tracks.length > 0) {
-                    resolvedYoutubeLink = tracks[0].info.uri;
-                }
-            } catch (error) {
-                console.error('Error resolving Spotify to YouTube:', error);
-            }
-        } else if (sourceName === 'youtube') {
-            resolvedYoutubeLink = track.info.uri;
-        }
-
         const trackEmbed = new Discord.EmbedBuilder()
             .setColor('Blue')
             .setTitle(track.info.title)
@@ -107,6 +88,27 @@ module.exports = async function (client) {
             })
             .setTimestamp();
 
+        let message = await channel.send({ embeds: [trackEmbed] });
+
+        let resolvedYoutubeLink = '';
+        const sourceName = track.info.sourceName;
+
+        if (sourceName === 'spotify') {
+            const query = `${track.info.author} ${track.info.title}`;
+            try {
+                const resolve = await client.poru.resolve({ query });
+                const { tracks } = resolve;
+
+                if (tracks.length > 0) {
+                    resolvedYoutubeLink = tracks[0].info.uri;
+                }
+            } catch (error) {
+                console.error('Error resolving Spotify to YouTube:', error);
+            }
+        } else if (sourceName === 'youtube') {
+            resolvedYoutubeLink = track.info.uri;
+        }
+
         const actionRow = new Discord.ActionRowBuilder();
 
         if (resolvedYoutubeLink) {
@@ -127,12 +129,8 @@ module.exports = async function (client) {
             );
         }
 
-        if (channel) {
-            if (actionRow.components.length > 0) {
-                channel.send({ embeds: [trackEmbed], components: [actionRow] });
-            } else {
-                channel.send({ embeds: [trackEmbed] });
-            }
+        if (actionRow.components.length > 0) {
+            await message.edit({ components: [actionRow] });
         }
     });
 
