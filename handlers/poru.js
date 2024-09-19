@@ -86,7 +86,6 @@ module.exports = async function (client) {
 
         await updateVoiceStatus(player.voiceChannel, process.env.DiscordToken, `Playing: ${track.info.title}`);
 
-
         await setPlayerVolume(client, player);
         player.filters.setEqualizer(equalizer);
 
@@ -159,8 +158,11 @@ module.exports = async function (client) {
         }
     });
 
-    client.poru.on("queueEnd", (player) => {
+    client.poru.on("queueEnd", async (player) => {
         const channel = client.channels.cache.get(player.textChannel);
+
+        await updateVoiceStatus(player.voiceChannel, process.env.DiscordToken, null);
+
         if (channel) {
             channel.send("🛑 Queue has ended.");
         }
