@@ -5,20 +5,30 @@ module.exports = {
     name: Discord.Events.InteractionCreate,
     once: false,
     async execute(interaction) {
-        if (!interaction.isChatInputCommand()) return;
+        if (interaction.isChatInputCommand()) {
+            const command = interaction.client.slashsCmds.get(interaction.commandName);
 
-        const command = interaction.client.slashsCmds.get(interaction.commandName);
+            if (!command) {
+                console.warn(colors.yellow(`Command ${interaction.commandName} not found.`));
+                return;
+            }
 
-        if (!command) {
-            console.warn(colors.yellow(`Command ${interaction.commandName} not found.`));
-            return;
-        }
+            try {
+                await command.execute(interaction);
+            } catch (error) {
+                console.error(colors.red(error.stack || error));
+                await handleCommandError(interaction, 'There was an error while executing this command!');
+            }
+        } else if (interaction.isAutocomplete()) {
+            const command = interaction.client.slashsCmds.get(interaction.commandName);
 
-        try {
-            await command.execute(interaction);
-        } catch (error) {
-            console.error(colors.red(error.stack || error));
-            await handleCommandError(interaction, 'There was an error while executing this command!');
+            if (!command || !command.autocomplete) return;
+
+            try {
+                await command.autocomplete(interaction);
+            } catch (error) {
+                console.error(colors.red(error.stack || error));
+            }
         }
     },
 };

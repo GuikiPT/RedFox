@@ -10,8 +10,13 @@
   "author": "GuikiPT",
   "license": "ISC",
   "dependencies": {
+    "@devraelfreeze/discordjs-pagination": "^2.7.6",
+    "@pkmn/data": "^0.9.15",
+    "@pkmn/dex": "^0.9.15",
+    "@pkmn/smogon": "^0.5.13",
     "axios": "^1.7.7",
     "better-logging": "^5.0.0",
+    "colornames": "^1.1.1",
     "colors": "^1.4.0",
     "discord.js": "^14.16.2",
     "dotenv": "^16.4.5",
