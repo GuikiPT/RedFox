@@ -101,7 +101,7 @@ module.exports = async function (client) {
             })
             .addFields(
                 { name: '**Author**', value: `\`\`\`${track.info.author}\`\`\``, inline: false },
-                { name: '**Music Name**', value: `\`\`\`${track.info.title}\`\`\``, inline: false },
+                { name: '**Music Name**', value: `\`\`\`${track.info.author + " - " + track.info.title}\`\`\``, inline: false },
                 { name: '**Duration**', value: `\`\`\`${formatDuration(track.info.length)}\`\`\``, inline: false },
                 { name: '**Volume**', value: `\`\`\`${player.volume}%\`\`\``, inline: false },
             )
