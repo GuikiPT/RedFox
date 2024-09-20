@@ -37,7 +37,7 @@ module.exports = {
         deaf: true,
       });
 
-      const resolve = await interaction.client.poru.resolve({ query });
+      const resolve = await interaction.client.poru.resolve({ query: `${query} oficial music` });
 
       const { loadType, tracks, playlistInfo } = resolve;
 
