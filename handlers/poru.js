@@ -84,7 +84,7 @@ module.exports = async function (client) {
     client.poru.on("trackStart", async (player, track) => {
         const channel = client.channels.cache.get(player.textChannel);
 
-        await updateVoiceStatus(player.voiceChannel, process.env.DiscordToken, `<a:redfox_music:1286282725124472842> Playing: ${track.info.title}`);
+        await updateVoiceStatus(player.voiceChannel, process.env.DiscordToken, `<a:redfox_music:1286282725124472842> Playing: ${track.info.author} - ${track.info.title}`);
 
         await setPlayerVolume(client, player);
         player.filters.setEqualizer(equalizer);
