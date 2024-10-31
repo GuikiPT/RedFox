@@ -4,36 +4,10 @@ const path = require('path');
 const moment = require('moment');
 const colors = require('colors/safe');
 require('dotenv').config();
-const { logMessage } = require('./functions/logs');
 require('better-logging')(console);
 const prompts = require('prompts');
 
-async function ConfigureBetterLoggingSystem() {
-    const logToFile = process.env.LogToFile === 'true';
-    const logDir = path.join(__dirname, 'logs', moment().format('YYYY'), moment().format('M'), moment().format('D'));
-
-    if (!fs.existsSync(logDir)) {
-        fs.mkdirSync(logDir, { recursive: true });
-    }
-
-    require('better-logging')(console, {
-        format: ctx => `[${moment().format('HH:mm:ss')}] [${moment().format('L')}] ${ctx.type} >> ${ctx.msg}`,
-        saveToFile: logToFile ? path.join(logDir, 'log.txt') : null,
-        color: {
-            base: colors.grey,
-            type: {
-                debug: colors.green,
-                info: colors.white,
-                log: colors.grey,
-                error: colors.red,
-                warn: colors.yellow,
-            },
-        },
-    });
-}
-
 async function deploySlashCommands() {
-    await ConfigureBetterLoggingSystem();
     console.log(colors.green('Starting Slash Command Deployment System...'));
 
     const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -88,17 +62,17 @@ async function deploySlashCommands() {
                 await confirmAndDeleteAll(client, 'test guild', guildId);
                 break;
             default:
-                logMessage('Invalid action specified.', colors.yellow);
+                console.log(colors.yellow('Invalid action specified.'))
         }
     } catch (error) {
-        console.error(colors.red(`Error during Slash Command Deployment: ${error.message}`));
+        logError('Error during Slash Command Deployment:', error);
     } finally {
         console.log(colors.yellow('Shutting down Slash Command Deployment System gracefully...'));
         await client.destroy();
     }
 }
 
-async function promptInput(message, validationMessage) {
+async function promptInput(message, validationMessage = 'Input is required') {
     const { input } = await prompts({
         type: 'text',
         name: 'input',
@@ -118,7 +92,7 @@ async function confirmAndDeleteAll(client, type, guildId = null) {
     if (confirmDelete) {
         await deleteAllCommands(client, guildId);
     } else {
-        logMessage(`Deletion of all ${type} commands canceled.`, colors.green);
+        console.log(colors.green(`Deletion of all ${type} commands canceled.`));
     }
 }
 
@@ -128,20 +102,25 @@ async function loadCommands() {
     for (const folder of slashFolders) {
         const slashFiles = fs.readdirSync(`${__dirname}/commands/slashs/${folder}`).filter(file => file.endsWith('.js'));
         for (const file of slashFiles) {
-            const slash = require(`${__dirname}/commands/slashs/${folder}/${file}`);
-            if ('data' in slash && 'execute' in slash) {
-                commands.push(slash.data.toJSON());
-            } else {
-                logMessage(`[WARNING] The command ${file} is missing "data" or "execute" property.`, colors.yellow);
+            try {
+                const slash = require(`${__dirname}/commands/slashs/${folder}/${file}`);
+                if ('data' in slash && 'execute' in slash) {
+                    commands.push(slash.data.toJSON());
+                } else {
+                    console.warn(colors.yellow(`[WARNING] The command ${file} is missing "data" or "execute" property.`))
+                }
+            } catch (error) {
+                logError(`Failed to load command ${file}:`, error);
             }
         }
     }
+    console.info(colors.green(`Loaded ${commands.length} commands successfully.`))
     return commands;
 }
 
 async function registerCommands(client, guildId = null) {
     const commands = await loadCommands();
-    const rest = new REST({ version: '10' }).setToken(process.env.DiscordToken);
+    const rest = createRestClient();
 
     try {
         const route = guildId
@@ -149,15 +128,14 @@ async function registerCommands(client, guildId = null) {
             : Routes.applicationCommands(client.user.id);
 
         const data = await rest.put(route, { body: commands });
-        logMessage(`Successfully reloaded ${data.length} ${guildId ? 'guild-specific' : 'application'} (/) commands.`, colors.green);
+        console.info(colors.green(`Successfully reloaded ${data.length} ${guildId ? 'guild-specific' : 'application'} (/) commands.`))
     } catch (error) {
-        logMessage('Error registering commands:', colors.red);
-        logMessage(error.stack || error.message, colors.red);
+        logError('Error registering commands:', error);
     }
 }
 
 async function deleteSingleCommand(client, commandName, guildId = null) {
-    const rest = new REST({ version: '10' }).setToken(process.env.DiscordToken);
+    const rest = createRestClient();
 
     try {
         const route = guildId
@@ -167,7 +145,7 @@ async function deleteSingleCommand(client, commandName, guildId = null) {
         const commands = await rest.get(route);
         const command = commands.find(cmd => cmd.name === commandName);
         if (!command) {
-            logMessage(`No command found with name: ${commandName}`, colors.yellow);
+            colors.warn(colors.yellow(`No command found with name: ${commandName}`));
             return;
         }
 
@@ -176,15 +154,14 @@ async function deleteSingleCommand(client, commandName, guildId = null) {
             : Routes.applicationCommand(client.user.id, command.id);
 
         await rest.delete(deleteRoute);
-        logMessage(`Successfully deleted command: ${commandName}`, colors.green);
+        console.log(colors.green(`Successfully deleted command: ${commandName}`))
     } catch (error) {
-        logMessage('Error deleting command:', colors.red);
-        logMessage(error.stack || error.message, colors.red);
+        logError('Error deleting command:', error);
     }
 }
 
 async function deleteAllCommands(client, guildId = null) {
-    const rest = new REST({ version: '10' }).setToken(process.env.DiscordToken);
+    const rest = createRestClient();
 
     try {
         const route = guildId
@@ -192,11 +169,14 @@ async function deleteAllCommands(client, guildId = null) {
             : Routes.applicationCommands(client.user.id);
 
         await rest.put(route, { body: [] });
-        logMessage(`Successfully deleted all ${guildId ? 'guild-specific' : 'application'} commands.`, colors.green);
+        console.log(colors.green(`Successfully deleted all ${guildId ? 'guild-specific' : 'application'} commands.`))
     } catch (error) {
-        logMessage('Error deleting all commands:', colors.red);
-        logMessage(error.stack || error.message, colors.red);
+        logError('Error deleting all commands:', error);
     }
+}
+
+function createRestClient() {
+    return new REST({ version: '10' }).setToken(process.env.DiscordToken);
 }
 
 module.exports = { deploySlashCommands };

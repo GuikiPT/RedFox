@@ -3,103 +3,69 @@ const Discord = require('discord.js');
 const moment = require('moment');
 const fs = require('fs');
 const path = require('path');
-const { logMessage } = require('./functions/logs');
-const { error } = require('console');
+require('dotenv').config();
 
-let client;
+const MEMORY_THRESHOLD_MB = 5;
+const MEMORY_CHECK_INTERVAL_MS = 60000;
+let lastMemoryUsage = 0;
+
+const INTENTS = [
+    Discord.GatewayIntentBits.AutoModerationConfiguration,
+    Discord.GatewayIntentBits.AutoModerationExecution,
+    Discord.GatewayIntentBits.DirectMessageReactions,
+    Discord.GatewayIntentBits.DirectMessages,
+    Discord.GatewayIntentBits.GuildEmojisAndStickers,
+    Discord.GatewayIntentBits.GuildIntegrations,
+    Discord.GatewayIntentBits.GuildInvites,
+    Discord.GatewayIntentBits.GuildMembers,
+    Discord.GatewayIntentBits.GuildMessageReactions,
+    Discord.GatewayIntentBits.GuildMessages,
+    Discord.GatewayIntentBits.GuildModeration,
+    Discord.GatewayIntentBits.GuildPresences,
+    Discord.GatewayIntentBits.GuildScheduledEvents,
+    Discord.GatewayIntentBits.GuildVoiceStates,
+    Discord.GatewayIntentBits.GuildWebhooks,
+    Discord.GatewayIntentBits.Guilds,
+    Discord.GatewayIntentBits.MessageContent,
+];
+
+const PARTIALS = [
+    Discord.Partials.Channel,
+    Discord.Partials.GuildMember,
+    Discord.Partials.GuildScheduledEvent,
+    Discord.Partials.Message,
+    Discord.Partials.Reaction,
+    Discord.Partials.ThreadMember,
+    Discord.Partials.User,
+];
 
 async function startBot() {
     async function initializeBot() {
         try {
-            await ConfigureBetterLoggingSystem();
-            
-            try {
-                await CheckEnvironmentVariables();
-            } catch (error) {
-                console.error(colors.red(error.message));
-                process.exit(1);
-            }
+            checkEnvironmentVariables();
 
+            console.info(colors.yellow('Starting the Bot . . .'));
 
-            logMessage('Starting the Bot . . .', colors.yellow);
-            await StartBot();
+            await startBotInstance();
         } catch (error) {
-            console.error(colors.red(`Initialization error: ${error.message}`));
+            logError(`Initialization error: ${error.message}`);
             process.exit(1);
         }
     }
 
-    initializeBot().catch(error => {
-        console.error(colors.red(`Initialization error: ${error.message}`));
-        process.exit(1);
-    });
+    initializeBot();
 
-    async function ConfigureBetterLoggingSystem() {
-        const logToFile = process.env.LogToFile === 'true';
-        const logDir = path.join(__dirname, 'logs', moment().format('YYYY'), moment().format('M'), moment().format('D'));
-
-        if (!fs.existsSync(logDir)) {
-            fs.mkdirSync(logDir, { recursive: true });
-        }
-
-        require('better-logging')(console, {
-            format: ctx => `[${moment().format('HH:mm:ss')}] [${moment().format('L')}] ${ctx.type} >> ${ctx.msg}`,
-            saveToFile: logToFile ? path.join(logDir, 'log.txt') : null,
-            color: {
-                base: colors.grey,
-                type: {
-                    debug: colors.green,
-                    info: colors.white,
-                    log: colors.grey,
-                    error: colors.red,
-                    warn: colors.yellow,
-                },
-            },
-        });
-    }
-
-    async function CheckEnvironmentVariables() {
+    function checkEnvironmentVariables() {
         const requiredEnvVars = ['DiscordToken'];
         for (const varName of requiredEnvVars) {
             if (!process.env[varName]) {
-                throw new Error(`Initialization error: Environment variable ${varName} is missing.`);
+                throw new Error(`Environment variable ${varName} is missing.`);
             }
         }
-        return true;
     }
 
-    async function StartBot() {
-        client = new Discord.Client({
-            intents: [
-                Discord.GatewayIntentBits.AutoModerationConfiguration,
-                Discord.GatewayIntentBits.AutoModerationExecution,
-                Discord.GatewayIntentBits.DirectMessageReactions,
-                Discord.GatewayIntentBits.DirectMessages,
-                Discord.GatewayIntentBits.GuildEmojisAndStickers,
-                Discord.GatewayIntentBits.GuildIntegrations,
-                Discord.GatewayIntentBits.GuildInvites,
-                Discord.GatewayIntentBits.GuildMembers,
-                Discord.GatewayIntentBits.GuildMessageReactions,
-                Discord.GatewayIntentBits.GuildMessages,
-                Discord.GatewayIntentBits.GuildModeration,
-                Discord.GatewayIntentBits.GuildPresences,
-                Discord.GatewayIntentBits.GuildScheduledEvents,
-                Discord.GatewayIntentBits.GuildVoiceStates,
-                Discord.GatewayIntentBits.GuildWebhooks,
-                Discord.GatewayIntentBits.Guilds,
-                Discord.GatewayIntentBits.MessageContent,
-            ],
-            partials: [
-                Discord.Partials.Channel,
-                Discord.Partials.GuildMember,
-                Discord.Partials.GuildScheduledEvent,
-                Discord.Partials.Message,
-                Discord.Partials.Reaction,
-                Discord.Partials.ThreadMember,
-                Discord.Partials.User,
-            ],
-        });
-
+    async function startBotInstance() {
+        client = new Discord.Client({ intents: INTENTS, partials: PARTIALS });
         client.slashsCmds = new Discord.Collection();
 
         try {
@@ -111,31 +77,36 @@ async function startBot() {
 
             await client.login(process.env.DiscordToken);
 
-            process.on('SIGINT', async () => {
-                logMessage('Shutting down bot...', colors.yellow);
-                await client.destroy();
-                process.exit();
-            });
-
-            process.on('SIGTERM', async () => {
-                logMessage('Received termination signal, shutting down bot...', colors.yellow);
-                await client.destroy();
-                process.exit();
-            });
-        } catch (err) {
-            console.error(colors.red(err.stack || err));
+            process.on('SIGINT', shutdownBot);
+            process.on('SIGTERM', shutdownBot);
+        } catch (error) {
+            logError(`Error starting bot: ${error.stack || error}`);
         }
     }
 
-    let lastMemoryUsage = 0;
+    async function shutdownBot() {
+
+        console.log(colors.yellow('Shutting down bot...'));
+        try {
+            await client.destroy();
+            process.exit();
+        } catch (error) {
+            logError(`Error during shutdown: ${error.message}`);
+            process.exit(1);
+        }
+    }
 
     setInterval(() => {
         const memoryUsage = process.memoryUsage().rss / 1024 / 1024;
-        if (Math.abs(memoryUsage - lastMemoryUsage) > 5) {
+        if (Math.abs(memoryUsage - lastMemoryUsage) > MEMORY_THRESHOLD_MB) {
             console.debug(colors.blue(`Memory Usage: RSS: ${memoryUsage.toFixed(2)} MB`));
             lastMemoryUsage = memoryUsage;
         }
-    }, 60000);
+    }, MEMORY_CHECK_INTERVAL_MS);
+}
+
+function logError(message) {
+    console.error(colors.red(message));
 }
 
 module.exports = { startBot };

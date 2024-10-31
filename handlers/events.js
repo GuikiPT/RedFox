@@ -1,48 +1,54 @@
 const fs = require('fs');
 const path = require('path');
 const colors = require('colors/safe');
-const { logMessage } = require('../functions/logs');
 
 module.exports = async function (client) {
     let numberOfLoadedEvents = 0;
-    logMessage('Loading Events Handler . . .', colors.yellow);
+    console.info(colors.yellow('Loading Events Handler . . .'));
 
-    const eventsPath = path.join(__dirname, '/../events');
+    const eventsPath = path.join(__dirname, '../events');
     const eventFolders = fs.readdirSync(eventsPath);
+
+    const bindEvent = (event, eventName, filePath, once = false) => {
+        const eventHandler = async (...args) => {
+            try {
+                await event.execute(...args);
+            } catch (error) {
+                console.error(colors.red(`Error executing event '${eventName}' in file '${filePath}': ${error.message}`));
+            }
+        };
+
+        if (once) {
+            client.once(eventName, eventHandler);
+        } else {
+            client.on(eventName, eventHandler);
+        }
+    };
 
     for (const folder of eventFolders) {
         const eventFiles = fs.readdirSync(path.join(eventsPath, folder)).filter(file => file.endsWith('.js'));
 
         for (const file of eventFiles) {
+            const filePath = path.join(eventsPath, folder, file);
             try {
-                const eventPath = path.join(eventsPath, folder, file);
-                const event = require(eventPath);
+                const event = require(filePath);
 
-                if (event.once) {
-                    client.once(event.name, async (...args) => {
-                        try {
-                            await event.execute(...args);
-                        } catch (error) {
-                            console.error(colors.red(`Error executing event ${event.name} in ${folder}/${file}: ${error.message}`));
-                        }
-                    });
-                } else {
-                    client.on(event.name, async (...args) => {
-                        try {
-                            await event.execute(...args);
-                        } catch (error) {
-                            console.error(colors.red(`Error executing event ${event.name} in ${folder}/${file}: ${error.message}`));
-                        }
-                    });
+                if (!event.name || !event.execute) {
+                    console.warn(colors.yellow(`Warning: Event file '${filePath}' is missing a 'name' or 'execute' property.`))
+                    continue;
                 }
 
+                bindEvent(event, event.name, filePath, event.once);
                 numberOfLoadedEvents++;
-            } catch (err) {
-                console.error(colors.red(`Failed to load event: ${folder}/${file}`));
-                console.error(colors.red(err.stack || err));
+
+                if (process.env.DEBUG) {
+                    console.debug(`Loaded event: ${event.name} from ${folder}/${file}`)
+                }
+            } catch (error) {
+                console.error(colors.red(`Failed to load event from file: '${filePath}'`));
+                console.error(colors.red(error.stack || error));
             }
         }
     }
-
-    logMessage(`Loaded ${numberOfLoadedEvents} events`, colors.green);
+    console.log(colors.green(`Loaded ${numberOfLoadedEvents} events successfully`))
 };
