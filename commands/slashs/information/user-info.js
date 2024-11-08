@@ -5,7 +5,7 @@ const COMMAND_ERROR_MESSAGE = '❌ An error occurred while executing this comman
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('userinfo')
+		.setName('user-info')
 		.setDescription('Displays information about a user.')
 		.addUserOption(option =>
 			option.setName('target')

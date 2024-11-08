@@ -86,10 +86,9 @@ async function handleButtonClick(i, interaction, emojiUrl, emojiName, isPrivate,
 
     await interaction.followUp({ content: responseContent, ephemeral: true });
 
-    collector.stop(); // Stop the collector to prevent further interactions
+    collector.stop();
 }
 
-// Helper function to disable the button
 async function disableButton(interaction) {
     const disabledRow = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
