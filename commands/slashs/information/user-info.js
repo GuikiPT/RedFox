@@ -5,7 +5,7 @@ const COMMAND_ERROR_MESSAGE = '❌ An error occurred while executing this comman
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('user-info')
+		.setName('userinfo')
 		.setDescription('Displays information about a user.')
 		.addUserOption(option =>
 			option.setName('target')
@@ -16,10 +16,10 @@ module.exports = {
 				.setDescription('Whether the response should be private (ephemeral)')
 		),
 	async execute(interaction) {
+		const isPrivate = interaction.options.getBoolean('private') || false;
+
 		try {
 			const user = interaction.options.getUser('target') || interaction.user;
-			const isPrivate = interaction.options.getBoolean('private') || false;
-
 			await user.fetch({ force: true });
 
 			const member = await interaction.guild.members.fetch({ user, force: true }).catch(() => null);
@@ -117,20 +117,21 @@ module.exports = {
 				await interaction.editReply({ components: [disabledRow] });
 			});
 		} catch (error) {
-			await handleError(interaction, error);
+			await handleError(interaction, 'fetching user information', error, isPrivate);
 		}
 	},
 };
 
-async function handleError(interaction, error) {
-	try {
-		console.error(colors.red(`Error executing /userinfo: ${error.stack || error}`));
+async function handleError(interaction, action, error, isPrivate) {
+	const errorMessage = `${COMMAND_ERROR_MESSAGE} while ${action}. Please try again later.`;
 
+	try {
 		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: COMMAND_ERROR_MESSAGE, ephemeral: true });
+			await interaction.followUp({ content: errorMessage, ephemeral: isPrivate });
 		} else {
-			await interaction.reply({ content: COMMAND_ERROR_MESSAGE, ephemeral: true });
+			await interaction.reply({ content: errorMessage, ephemeral: isPrivate });
 		}
+		console.error(colors.red(`Error ${action}: ${error.stack || error}`));
 	} catch (errorHandlingError) {
 		console.error(colors.red(`Error handling command error: ${errorHandlingError.stack || errorHandlingError}`));
 	}

@@ -3,11 +3,15 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('server-info')
-		.setDescription('Displays detailed information about the server.'),
+		.setDescription('Displays detailed information about the server.')
+		.addBooleanOption(option => 
+			option.setName('private')
+				.setDescription('Whether the response should be private (ephemeral)')),
 	async execute(interaction) {
+		const isPrivate = interaction.options.getBoolean('private') || false;
+
 		try {
 			const guild = interaction.guild;
-
 			const owner = await guild.fetchOwner();
 
 			const memberStatus = {
@@ -50,22 +54,23 @@ module.exports = {
 				inline: false 
 			});
 
-			await interaction.reply({ embeds: [embed] });
+			await interaction.reply({ embeds: [embed], ephemeral: isPrivate });
 		} catch (error) {
-			console.error(`Error executing /serverinfo: ${error}`);
-			await handleCommandError(interaction, error);
+			await handleCommandError(interaction, 'retrieving server information', error, isPrivate);
 		}
 	},
 };
 
-async function handleCommandError(interaction, error) {
+async function handleCommandError(interaction, action, error, isPrivate) {
+	const errorMessage = `❌ An error occurred while ${action}. Please try again later.`;
+
 	try {
 		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: '❌ An error occurred while executing this command.', ephemeral: true });
+			await interaction.followUp({ content: errorMessage, ephemeral: isPrivate });
 		} else {
-			await interaction.reply({ content: '❌ An error occurred while executing this command.', ephemeral: true });
+			await interaction.reply({ content: errorMessage, ephemeral: isPrivate });
 		}
-		console.error(`Command error: ${error.stack || error}`);
+		console.error(`Error ${action}: ${error.stack || error}`);
 	} catch (replyError) {
 		console.error(`Failed to send error message: ${replyError.stack || replyError}`);
 	}
