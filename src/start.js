@@ -29,7 +29,7 @@ const figlet = require('figlet-promised');
 
 let versionInfo = 'Version info not available';
 if (fs.existsSync('./package.json')) {
-    const packageInfo = require('./package.json');
+    const packageInfo = require('../package.json');
     versionInfo = `Version: ${packageInfo.version} | By: ${packageInfo.author}`;
 }
 

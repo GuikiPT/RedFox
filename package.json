@@ -4,7 +4,8 @@
   "description": "",
   "main": "start.js",
   "scripts": {
-    "start": "node start.js"
+    "start": "node src/start.js",
+    "deploy": "node src/deploySlash.js"
   },
   "keywords": [],
   "author": "GuikiPT",
