@@ -6,10 +6,7 @@ import { ApplicationCommandType, ApplicationIntegrationType, InteractionContextT
 	description: 'ping pong'
 })
 export class UserCommand extends Command {
-	// Register Chat Input and Context Menu command
 	public override registerApplicationCommands(registry: Command.Registry) {
-		// Create shared integration types and contexts
-		// These allow the command to be used in guilds and DMs
 		const integrationTypes: ApplicationIntegrationType[] = [ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall];
 		const contexts: InteractionContextType[] = [
 			InteractionContextType.BotDM,
@@ -17,7 +14,6 @@ export class UserCommand extends Command {
 			InteractionContextType.PrivateChannel
 		];
 
-		// Register Chat Input command
 		registry.registerChatInputCommand({
 			name: this.name,
 			description: this.description,
@@ -25,7 +21,6 @@ export class UserCommand extends Command {
 			contexts
 		});
 
-		// Register Context Menu command available from any message
 		registry.registerContextMenuCommand({
 			name: this.name,
 			type: ApplicationCommandType.Message,
@@ -33,7 +28,6 @@ export class UserCommand extends Command {
 			contexts
 		});
 
-		// Register Context Menu command available from any user
 		registry.registerContextMenuCommand({
 			name: this.name,
 			type: ApplicationCommandType.User,
@@ -42,17 +36,14 @@ export class UserCommand extends Command {
 		});
 	}
 
-	// Message command
 	public override async messageRun(message: Message) {
 		return this.sendPing(message);
 	}
 
-	// Chat Input (slash) command
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		return this.sendPing(interaction);
 	}
 
-	// Context Menu command
 	public override async contextMenuRun(interaction: Command.ContextMenuCommandInteraction) {
 		return this.sendPing(interaction);
 	}
@@ -65,9 +56,8 @@ export class UserCommand extends Command {
 
 		if (!pingMessage) return;
 
-		const content = `Pong! Bot Latency ${Math.round(this.container.client.ws.ping)}ms. API Latency ${
-			pingMessage.createdTimestamp - interactionOrMessage.createdTimestamp
-		}ms.`;
+		const content = `Pong! Bot Latency ${Math.round(this.container.client.ws.ping)}ms. API Latency ${pingMessage.createdTimestamp - interactionOrMessage.createdTimestamp
+			}ms.`;
 
 		if (interactionOrMessage instanceof Message) {
 			return pingMessage.edit({ content });

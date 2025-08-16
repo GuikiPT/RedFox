@@ -1,7 +1,7 @@
 import type { Events } from '@sapphire/framework';
 import { Listener } from '@sapphire/framework';
 import type { Message } from 'discord.js';
-import { GuildService } from '../database/models/guild';
+import { GuildService } from '../../database/models/guild';
 
 export class UserEvent extends Listener<typeof Events.MentionPrefixOnly> {
 	public override async run(message: Message) {

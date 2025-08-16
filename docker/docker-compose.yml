@@ -1,0 +1,43 @@
+services:
+  redfox-postgres:
+    image: postgres:15-alpine
+    container_name: redfox-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: redfox
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    env_file:
+      - ./env/postgres.env
+    volumes:
+      - ./volumes/postgres/data/:/var/lib/postgresql/data:rw
+      - ./volumes/postgres/postgres-init:/docker-entrypoint-initdb.d:rw
+    networks:
+      guikipt_network:
+        ipv4_address: 172.30.1.20
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U redfox -d redfox"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redfox-pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: redfox-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    env_file:
+      - ./env/pgadmin.env
+    volumes:
+      - ./volumes/pgadmin/data/:/var/lib/pgadmin:rw
+    networks:
+      guikipt_network:
+        ipv4_address: 172.30.1.21
+    depends_on:
+      redfox-postgres:
+        condition: service_healthy
+
+networks:
+  guikipt_network:
+    name: guikipt_network
+    external: true

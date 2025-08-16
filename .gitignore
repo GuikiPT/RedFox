@@ -1,5 +1,8 @@
 # Custom
 .env
+docker/env/pgadmin.env
+docker/env/postgres.env
+docker/volumes/
 
 # Ignore a blackhole and the folder for development
 node_modules/
@@ -31,3 +34,11 @@ package-lock.json
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Docker volumes and data
+docker/postgres-data/
+postgres_data/
+pgadmin_data/
+
+# Docker override files
+docker-compose.override.yml
