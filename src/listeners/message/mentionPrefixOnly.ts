@@ -5,17 +5,15 @@ import { GuildService } from '../../database/models/guild';
 
 export class UserEvent extends Listener<typeof Events.MentionPrefixOnly> {
 	public override async run(message: Message) {
-		// Do nothing if we cannot send messages in the channel (eg. group DMs)
 		if (!message.channel.isSendable()) return;
 
 		let prefix: string;
 		
 		if (message.guild) {
-			// Get custom prefix from database for guilds
 			const guildPrefix = await GuildService.getGuildPrefix(message.guild.id);
+			this.container.logger.info(`Fetched guild prefix for ${message.guild.id}: ${guildPrefix}`);
 			prefix = guildPrefix || 'rf!';
 		} else {
-			// Use default prefix for DMs
 			const defaultPrefix = this.container.client.options.defaultPrefix;
 			prefix = Array.isArray(defaultPrefix) ? defaultPrefix[0] : defaultPrefix || 'rf!';
 		}

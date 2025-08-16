@@ -1,7 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../../database';
 
-// Define the attributes for the Guild model
 interface GuildAttributes {
 	id: number;
 	guildId: string;
@@ -10,10 +9,8 @@ interface GuildAttributes {
 	updatedAt?: Date;
 }
 
-// Define the creation attributes (optional fields for creation)
 interface GuildCreationAttributes extends Optional<GuildAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
 
-// Define the Guild model class
 export class Guild extends Model<GuildAttributes, GuildCreationAttributes> {
 	declare id: number;
 	declare guildId: string;
@@ -22,7 +19,6 @@ export class Guild extends Model<GuildAttributes, GuildCreationAttributes> {
 	declare readonly updatedAt: Date;
 }
 
-// Initialize the Guild model
 Guild.init(
 	{
 		id: {

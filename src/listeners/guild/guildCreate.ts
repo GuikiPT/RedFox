@@ -6,7 +6,6 @@ import { GuildService } from '../../database/models/guild';
 export class UserEvent extends Listener<typeof Events.GuildCreate> {
 	public override async run(guild: Guild) {
 		try {
-			// Create guild record with default prefix when bot joins
 			await GuildService.getOrCreateGuild(guild.id, 'rf!');
 			this.container.logger.info(`📥 Bot joined guild: ${guild.name} (${guild.id})`);
 		} catch (error) {
