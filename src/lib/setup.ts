@@ -15,5 +15,7 @@ ApplicationCommandRegistries.setDefaultBehaviorWhenNotIdentical(RegisterBehavior
 // Read env var
 setup({ path: join(srcDir, '.env') });
 
+
+
 // Enable colorette
 colorette.createColors({ useColor: true });

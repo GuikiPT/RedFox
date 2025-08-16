@@ -3,6 +3,8 @@ import './lib/setup';
 import { LogLevel, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits } from 'discord.js';
 import { initializeDatabase, closeDatabase, GuildService } from './database';
+import { getRootData } from '@sapphire/pieces';
+import { join } from 'node:path';
 
 const client = new SapphireClient({
 	caseInsensitiveCommands: true,
@@ -29,6 +31,10 @@ const client = new SapphireClient({
 	}
 });
 
+const rootData = getRootData();
+client.stores.get('commands')
+  .registerPath(join(rootData.root, 'cmds', 'commands'));
+
 const main = async () => {
 	try {
 		client.logger.info('Initializing database...');
@@ -47,15 +53,15 @@ const main = async () => {
 
 process.on('SIGINT', async () => {
 	client.logger.info('Received SIGINT, shutting down gracefully...');
-	await client.destroy();
 	await closeDatabase(client);
+	await client.destroy();
 	process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
 	client.logger.info('Received SIGTERM, shutting down gracefully...');
-	await client.destroy();
 	await closeDatabase(client);
+	await client.destroy();
 	process.exit(0);
 });
 
