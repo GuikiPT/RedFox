@@ -1,5 +1,3 @@
-export { default as sequelize, initializeDatabase, closeDatabase } from './database';
-
+// Export database functions and models
+export { initializeDatabase, closeDatabase, sequelize } from './database';
 export * from './models';
-
-import './models/guild';

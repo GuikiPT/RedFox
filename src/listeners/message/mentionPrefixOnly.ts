@@ -12,7 +12,8 @@ export class UserEvent extends Listener<typeof Events.MentionPrefixOnly> {
 		
 		if (message.guild) {
 			// Get custom prefix from database for guilds
-			prefix = await GuildService.getGuildPrefix(message.guild.id);
+			const guildPrefix = await GuildService.getGuildPrefix(message.guild.id);
+			prefix = guildPrefix || 'rf!';
 		} else {
 			// Use default prefix for DMs
 			const defaultPrefix = this.container.client.options.defaultPrefix;
