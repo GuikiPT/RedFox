@@ -1,4 +1,3 @@
-// src/commands/prefix/shared.ts
 import { EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import type { Message } from 'discord.js';
 import type { Subcommand } from '@sapphire/plugin-subcommands';
@@ -65,7 +64,6 @@ export async function updatePrefix(
     }
 }
 
-// Small helpers you might want in the handlers
 export function hasManageGuildPermission(message: Message) {
     return Boolean(message.member?.permissions.has(PermissionFlagsBits.ManageGuild));
 }

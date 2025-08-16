@@ -1,4 +1,3 @@
-// src/commands/prefix/index.ts
 import { ApplyOptions } from '@sapphire/decorators';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import { ApplicationCommandOptionType, ApplicationIntegrationType, InteractionContextType, Message } from 'discord.js';
@@ -17,7 +16,6 @@ import { messageSet, chatInputSet } from '../../subcommands/settings/prefix/set'
     ]
 })
 export class PrefixCommand extends Subcommand {
-    // Slash command registration unchanged
     public override registerApplicationCommands(registry: Subcommand.Registry) {
         const integrationTypes: ApplicationIntegrationType[] = [ApplicationIntegrationType.GuildInstall];
         const contexts: InteractionContextType[] = [InteractionContextType.Guild];
@@ -52,7 +50,6 @@ export class PrefixCommand extends Subcommand {
         });
     }
 
-    // Delegate methods that Subcommand plugin will call
     public async messageView(message: Message) {
         return messageView(message);
     }

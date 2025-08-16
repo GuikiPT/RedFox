@@ -1,4 +1,3 @@
-// src/commands/prefix/view.ts
 import type { Message } from 'discord.js';
 import type { Subcommand } from '@sapphire/plugin-subcommands';
 import { getCurrentPrefix, respond } from './shared';

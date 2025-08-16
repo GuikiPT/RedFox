@@ -1,4 +1,3 @@
-// src/commands/prefix/set.ts
 import type { Message } from 'discord.js';
 import type { Subcommand } from '@sapphire/plugin-subcommands';
 import { Args } from '@sapphire/framework';
