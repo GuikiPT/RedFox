@@ -19,12 +19,19 @@ export class UserCommand extends Command {
 		];
 
 		// Register slash command
-		registry.registerChatInputCommand({
-			name: this.name,
-			description: this.description,
-			integrationTypes,
-			contexts
-		});
+		registry.registerChatInputCommand((builder) =>
+			builder
+				.setName(this.name)
+				.setDescription(this.description)
+				.setIntegrationTypes(integrationTypes)
+				.setContexts(contexts)
+				.addBooleanOption((option) =>
+					option
+						.setName('ephemeral')
+						.setDescription('Whether the response should be visible only to you (default: true)')
+						.setRequired(false)
+				)
+		);
 
 		// Register context menu command available from any message
 		registry.registerContextMenuCommand({
@@ -45,7 +52,7 @@ export class UserCommand extends Command {
 
 	// Message command
 	public override async messageRun(message: Message) {
-		const pingMessage = await send(message, 'Ping?');
+		const pingMessage = await send(message, '<a:DiscordLoading:1451612060868808780>');
 
 		const botLatency = Math.round(this.container.client.ws.ping);
 		const apiLatency = (pingMessage.editedTimestamp || pingMessage.createdTimestamp) - (message.editedTimestamp || message.createdTimestamp);
@@ -57,7 +64,9 @@ export class UserCommand extends Command {
 
 	// slash command
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		const msg = await interaction.reply({ content: 'Ping?', fetchReply: true });
+		const ephemeral = interaction.options.getBoolean('ephemeral') ?? true;
+		await interaction.deferReply({ ephemeral });
+		const msg = await interaction.fetchReply();
 
 		const botLatency = Math.round(this.container.client.ws.ping);
 		const apiLatency = msg.createdTimestamp - interaction.createdTimestamp;
@@ -69,7 +78,8 @@ export class UserCommand extends Command {
 
 	// context menu command
 	public override async contextMenuRun(interaction: Command.ContextMenuCommandInteraction) {
-		const msg = await interaction.reply({ content: 'Ping?', fetchReply: true });
+		await interaction.deferReply();
+		const msg = await interaction.fetchReply();
 
 		const botLatency = Math.round(this.container.client.ws.ping);
 		const apiLatency = msg.createdTimestamp - interaction.createdTimestamp;
