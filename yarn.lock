@@ -220,6 +220,13 @@
   dependencies:
     "@skyra/editable-commands" "^3.0.4"
 
+"@sapphire/plugin-hmr@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@sapphire/plugin-hmr/-/plugin-hmr-3.0.2.tgz#6fd03d7abcd8e234367aa43489d06183e86535f1"
+  integrity sha512-Rn1NV/ERUpMVgWQacDlASLbUPQvdzZOZykHlrlGCFMaSStf3t6Pv80gzuHMpd3rSJubo+SwHFyy+kY+Bxvnq6Q==
+  dependencies:
+    chokidar "^4.0.1"
+
 "@sapphire/plugin-logger@^4.0.2":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@sapphire/plugin-logger/-/plugin-logger-4.1.0.tgz#dfb250a9b0674d458f5df5f56ad99cc3b00f8787"
@@ -413,6 +420,13 @@ brace-expansion@^1.1.7:
   dependencies:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
+
+chokidar@^4.0.1:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-4.0.3.tgz#7be37a4c03c9aee1ecfe862a4a23b2c70c205d30"
+  integrity sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==
+  dependencies:
+    readdirp "^4.0.1"
 
 chownr@^2.0.0:
   version "2.0.0"
@@ -931,6 +945,11 @@ readable-stream@^3.6.0:
     inherits "^2.0.3"
     string_decoder "^1.1.1"
     util-deprecate "^1.0.1"
+
+readdirp@^4.0.1:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/readdirp/-/readdirp-4.1.2.tgz#eb85801435fbf2a7ee58f19e0921b068fc69948d"
+  integrity sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==
 
 rimraf@^3.0.2:
   version "3.0.2"

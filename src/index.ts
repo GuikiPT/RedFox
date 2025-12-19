@@ -2,6 +2,8 @@ import './lib/setup';
 
 import { LogLevel, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits, Partials } from 'discord.js';
+import '@sapphire/plugin-hmr/register';
+import '@sapphire/plugin-utilities-store/register';
 
 const client = new SapphireClient({
 	defaultPrefix: 'rf!',
@@ -24,7 +26,10 @@ const client = new SapphireClient({
 		GatewayIntentBits.MessageContent
 	],
 	partials: [Partials.Channel],
-	loadMessageCommandListeners: true
+	loadMessageCommandListeners: true,
+	hmr: {
+		enabled: process.env.NODE_ENV === 'development'
+	}
 });
 
 const main = async () => {
