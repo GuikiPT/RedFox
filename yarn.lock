@@ -160,7 +160,7 @@
   resolved "https://registry.yarnpkg.com/@sapphire/fetch/-/fetch-3.0.5.tgz#959e9f68b9bb59fa1d3fd9984881b9ab5b21f992"
   integrity sha512-YfH5iFFL+n21dEWfdNpSlN1Q4RH+84I9ZFLxtdlbqyWljkh1IwMU6UmHjnroiRJx9TwdFSQ0krHm4v0fV/VqiA==
 
-"@sapphire/framework@^5.3.2":
+"@sapphire/framework@^5.4.0":
   version "5.4.0"
   resolved "https://registry.yarnpkg.com/@sapphire/framework/-/framework-5.4.0.tgz#e47ca25933e67952167f7cdbb9b61cb3833f6123"
   integrity sha512-Gf0Ui5tOG1lRRf6Gpd/gpUDkAIMZxFXYOzq0X5kMcXRNWiX1B6iIUkyXrzCLaNunzqWRKe6x4UxzRewN5ktNWg==
@@ -234,6 +234,11 @@
   integrity sha512-3ngUpfKfcMX4zIlJ4SHLe10N79XU72H+Wdfcnd9ueMf6FOSMJFvVUfqDIp1rb7/iXi7C5dfx0pQqSwqu3UG0KQ==
   dependencies:
     "@sapphire/utilities" "^3.18.0"
+
+"@sapphire/plugin-utilities-store@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@sapphire/plugin-utilities-store/-/plugin-utilities-store-2.0.3.tgz#6b2a5bbcd22f66559424456374434c33e28e90c2"
+  integrity sha512-L/C7cdk2q+Yrbrq6xWNoDlb4Pb4SIoULJpFNMO4TXFJV6ldXBmQWF3A0mW1l7CGc6GiiOCCMEXbteYFFnqRo7Q==
 
 "@sapphire/prettier-config@^2.0.0":
   version "2.0.0"
@@ -475,7 +480,7 @@ discord-api-types@^0.38.1, discord-api-types@^0.38.16, discord-api-types@^0.38.3
   resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.38.37.tgz#0e9fa948e8483b0ff3b63a1902ea9a9c9b748921"
   integrity sha512-Cv47jzY1jkGkh5sv0bfHYqGgKOWO1peOrGMkDFM4UmaGMOTgOW8QSexhvixa9sVOiz8MnVOBryWYyw/CEVhj7w==
 
-discord.js@^14.17.3:
+discord.js@^14.25.1:
   version "14.25.1"
   resolved "https://registry.yarnpkg.com/discord.js/-/discord.js-14.25.1.tgz#ef8a298b814de2377776fcc732429cc53444d8ad"
   integrity sha512-2l0gsPOLPs5t6GFZfQZKnL1OJNYFcuC/ETWsW4VtKVD/tg4ICa9x+jb9bkPffkMdRpRpuUaO/fKkHCBeiCKh8g==
